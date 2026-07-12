@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+@theme {
+  /* Surfaces */
+  --color-surface: #07090d;
+  --color-panel: #0b0f14;
+  --color-panel-2: #10161e;
+  --color-edge: #1c2530;
+  --color-edge-bright: #2c3a4a;
+
+  /* Ink */
+  --color-ink: #e6edf3;
+  --color-ink-dim: #93a1b0;
+  --color-ink-faint: #5d6a77;
+
+  /* Brand chrome (never a data series) */
+  --color-accent: #22d3ee;
+  --color-accent-dim: #0e7490;
+
+  /* Outcome series — validated categorical trio on the dark surface */
+  --color-p1: #3987e5;
+  --color-draw: #c98500;
+  --color-p2: #199e70;
+
+  /* Status — reserved */
+  --color-good: #0ca30c;
+  --color-bad: #d03b3b;
+  --color-warn: #fab219;
+
+  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", monospace;
+}
+
+html {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+}
+
+/* Faint pitch-grid backdrop for the hero */
+.grid-backdrop {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--color-edge) 55%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-edge) 55%, transparent) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 0%, black 35%, transparent 78%);
+}
+
+/* Wallet-adapter modal/button, restyled to the app chrome */
+.wallet-adapter-button-trigger {
+  background: var(--color-panel-2) !important;
+  border: 1px solid var(--color-edge-bright) !important;
+  border-radius: 8px !important;
+  font-family: var(--font-sans) !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  height: 40px !important;
+  line-height: 38px !important;
+  padding: 0 16px !important;
+  transition: border-color 0.15s ease;
+}
+.wallet-adapter-button-trigger:hover {
+  border-color: var(--color-accent) !important;
+  background: var(--color-panel-2) !important;
+}
+.wallet-adapter-modal-wrapper {
+  background: var(--color-panel) !important;
+  border: 1px solid var(--color-edge) !important;
+  font-family: var(--font-sans) !important;
+}
+.wallet-adapter-modal-button-close {
+  background: var(--color-panel-2) !important;
+}

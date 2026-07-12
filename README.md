@@ -6,7 +6,7 @@ TxODDS publishes Merkle roots of every 5-minute batch of World Cup match data on
 
 Built for the **TxODDS x Solana World Cup Hackathon 2026 — Prediction Markets & Settlement track**, by the same author as the Consumer-track entry [MatchDay](https://github.com/rsercano/matchday) (a Telegram watch-party bot; distinct project, shared feed knowledge only).
 
-> **Status:** SDK and the parimutuel market program are live end-to-end on devnet — a real World Cup quarterfinal (Norway 1-2 England) has been settled permissionlessly against TxODDS' published Merkle root. Web UI in progress.
+> **Status:** SDK, the parimutuel market program and the web UI are live end-to-end on devnet — a real World Cup quarterfinal (Norway 1-2 England) has been settled permissionlessly against TxODDS' published Merkle root, and the UI's "Verify this settlement" panel replays the full proof chain against the on-chain root in the browser.
 >
 > **Market program (devnet):** [`45MwWqTXE9nWN2kyVERpZqRXwr6vDDaMyk9sYudG14qx`](https://explorer.solana.com/address/45MwWqTXE9nWN2kyVERpZqRXwr6vDDaMyk9sYudG14qx?cluster=devnet)
 
@@ -30,7 +30,7 @@ Built for the **TxODDS x Solana World Cup Hackathon 2026 — Prediction Markets 
    └──────────────────┬──────────────────────────┘   anyone with the proof settles
                       ▼
    ┌─────────────────────────────────────────────┐
-   │ apps/web (WIP)                              │   market UI + "verify this
+   │ apps/web (Next.js)                          │   market UI + "verify this
    │                                             │   settlement" proof explorer
    └─────────────────────────────────────────────┘
 ```
@@ -81,6 +81,16 @@ npm run test:program   # localnet suite (13 tests) against the REAL txoracle pro
 npm run e2e:devnet     # full live cycle on devnet, prints every tx + explorer link
 ```
 
+## Web UI
+
+`apps/web` — Next.js 15 app on Solana devnet: markets list (decoded straight off `getProgramAccounts`), wallet-adapter betting (Phantom/Solflare), a mock-USDC faucet, the permissionless **resolve** flow (proof fetched browser-side via `@txsettle/sdk`, pre-verified as a free simulation, then submitted), and the **"Verify this settlement"** panel that walks the Merkle chain of custody — stat leaves → eventStatRoot → fixture sub-tree → main tree → the on-chain `daily_scores_roots` account — with the real hashes and a live on-chain re-verification.
+
+```bash
+cp apps/web/.env.example apps/web/.env.local   # set NEXT_PUBLIC_TXLINE_API_TOKEN (+ DEV_WALLET_PATH for the faucet)
+npm install && npm run build                    # builds the SDK, then the web app
+npm run dev -w @txsettle/web                    # http://localhost:3000
+```
+
 ## Repository layout
 
 | Path | What |
@@ -91,7 +101,7 @@ npm run e2e:devnet     # full live cycle on devnet, prints every tx + explorer l
 | `idls/txoracle.json` | txoracle IDL copy consumed by `declare_program!` (address patched to the devnet id) |
 | `tests/` | Localnet integration suite (real txoracle + daily roots cloned from devnet) |
 | `scripts/e2e-devnet.ts` | Live devnet run of the full market cycle on a real finished fixture |
-| `apps/web` | Verification / market UI (WIP) |
+| `apps/web` | Next.js market + verification UI: wallet-adapter betting, permissionless in-browser resolve, "Verify this settlement" proof explorer, mock-USDC faucet (`POST /api/faucet`) |
 
 ## Compliance notes
 

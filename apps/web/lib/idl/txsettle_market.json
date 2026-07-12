@@ -1,0 +1,989 @@
+{
+  "address": "45MwWqTXE9nWN2kyVERpZqRXwr6vDDaMyk9sYudG14qx",
+  "metadata": {
+    "name": "txsettle_market",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "TxSettle parimutuel 1X2 market settled trustlessly against TxLINE on-chain Merkle roots"
+  },
+  "instructions": [
+    {
+      "name": "claim",
+      "docs": [
+        "Pay out a winning position pro-rata from the vault",
+        "(or refund the original stake when nobody picked the winning outcome)."
+      ],
+      "discriminator": [
+        62,
+        198,
+        214,
+        193,
+        213,
+        159,
+        108,
+        210
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "signer": true
+        },
+        {
+          "name": "market",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.fixture_id",
+                "account": "Market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "vault",
+          "writable": true
+        },
+        {
+          "name": "user_token",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_market",
+      "docs": [
+        "Open a 1X2 market on a TxLINE fixture. Anyone can create a market;",
+        "the creator holds no special rights afterwards."
+      ],
+      "discriminator": [
+        103,
+        226,
+        97,
+        235,
+        200,
+        188,
+        251,
+        254
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "fixture_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "docs": [
+            "Stake denomination (devnet mock-USDC)."
+          ]
+        },
+        {
+          "name": "vault",
+          "docs": [
+            "Escrow for all stakes. Authority is the market PDA — only `claim` can move funds out."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "fixture_id",
+          "type": "i64"
+        },
+        {
+          "name": "close_ts",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "place",
+      "docs": [
+        "Stake `amount` of the market's mint on `outcome` (0 = P1Win, 1 = Draw, 2 = P2Win).",
+        "Repeat placements accumulate; switching outcome is rejected."
+      ],
+      "discriminator": [
+        143,
+        53,
+        56,
+        40,
+        41,
+        16,
+        5,
+        75
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.fixture_id",
+                "account": "Market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "user_token",
+          "writable": true
+        },
+        {
+          "name": "vault",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "outcome",
+          "type": "u8"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "resolve",
+      "docs": [
+        "Permissionless settlement: verify a TxLINE Merkle stat proof against the",
+        "on-chain daily root via txoracle `validate_stat_v2` and derive the outcome",
+        "from the proved full-match goal counts."
+      ],
+      "discriminator": [
+        246,
+        150,
+        236,
+        206,
+        108,
+        63,
+        58,
+        10
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.fixture_id",
+                "account": "Market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "daily_scores_roots",
+          "docs": [
+            "`daily_scores_roots` PDA from the proof's own `min_timestamp` under the",
+            "txoracle program id and requires this account to match it."
+          ]
+        },
+        {
+          "name": "txoracle_program",
+          "address": "6pW64gN1s2uqjHkn1unFeEjAwJkPGHoppGvS715wyP2J"
+        }
+      ],
+      "args": [
+        {
+          "name": "payload",
+          "type": {
+            "defined": {
+              "name": "StatValidationInput"
+            }
+          }
+        },
+        {
+          "name": "strategy",
+          "type": {
+            "defined": {
+              "name": "NDimensionalStrategy"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Market",
+      "discriminator": [
+        219,
+        190,
+        213,
+        55,
+        0,
+        227,
+        198,
+        154
+      ]
+    },
+    {
+      "name": "Position",
+      "discriminator": [
+        170,
+        188,
+        143,
+        228,
+        122,
+        64,
+        247,
+        208
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "CloseTsInPast",
+      "msg": "close_ts must be in the future"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidOutcome",
+      "msg": "outcome index must be 0 (P1Win), 1 (Draw) or 2 (P2Win)"
+    },
+    {
+      "code": 6002,
+      "name": "ZeroAmount",
+      "msg": "amount must be greater than zero"
+    },
+    {
+      "code": 6003,
+      "name": "MarketNotOpen",
+      "msg": "market is not open"
+    },
+    {
+      "code": 6004,
+      "name": "BettingClosed",
+      "msg": "betting is closed for this market"
+    },
+    {
+      "code": 6005,
+      "name": "OutcomeSwitch",
+      "msg": "position already staked on a different outcome"
+    },
+    {
+      "code": 6006,
+      "name": "MarketNotResolved",
+      "msg": "market is not resolved yet"
+    },
+    {
+      "code": 6007,
+      "name": "AlreadyClaimed",
+      "msg": "position already claimed"
+    },
+    {
+      "code": 6008,
+      "name": "NotAWinner",
+      "msg": "position did not win this market"
+    },
+    {
+      "code": 6009,
+      "name": "FixtureMismatch",
+      "msg": "proof fixture id does not match this market"
+    },
+    {
+      "code": 6010,
+      "name": "WrongStatKeys",
+      "msg": "proof must carry exactly the full-match goal stats (keys 1 and 2, once each)"
+    },
+    {
+      "code": 6011,
+      "name": "StatNotFinal",
+      "msg": "stat leaf is not from a finalised record (period must be 100)"
+    },
+    {
+      "code": 6012,
+      "name": "StrategyNotExactEquality",
+      "msg": "strategy must assert exact equality of every proved stat value"
+    },
+    {
+      "code": 6013,
+      "name": "BadProofTimestamp",
+      "msg": "proof timestamp does not map to a valid epoch day"
+    },
+    {
+      "code": 6014,
+      "name": "WrongRootsAccount",
+      "msg": "daily_scores_roots account does not match the PDA for the proof's epoch day"
+    },
+    {
+      "code": 6015,
+      "name": "ProofRejected",
+      "msg": "txoracle rejected the settlement proof"
+    },
+    {
+      "code": 6016,
+      "name": "Overflow",
+      "msg": "arithmetic overflow"
+    }
+  ],
+  "types": [
+    {
+      "name": "BinaryExpression",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Add"
+          },
+          {
+            "name": "Subtract"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Comparison",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "GreaterThan"
+          },
+          {
+            "name": "LessThan"
+          },
+          {
+            "name": "EqualTo"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GeometricTarget",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "stat_index",
+            "type": "u8"
+          },
+          {
+            "name": "prediction",
+            "type": "i32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Market",
+      "docs": [
+        "One parimutuel 1X2 market per TxLINE fixture.",
+        "PDA: `[\"market\", fixture_id (i64 LE)]`."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "fixture_id",
+            "docs": [
+              "TxLINE fixture id this market settles on (matches the proof's `fixture_summary.fixture_id`)."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "mint",
+            "docs": [
+              "SPL mint stakes are denominated in (devnet mock-USDC — never the TxL token)."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "vault",
+            "docs": [
+              "Escrow token account; authority is this market PDA itself."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "close_ts",
+            "docs": [
+              "Unix seconds; `place` is rejected from this moment on."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "state",
+            "type": {
+              "defined": {
+                "name": "MarketState"
+              }
+            }
+          },
+          {
+            "name": "outcome",
+            "docs": [
+              "Set exactly once by a successful `resolve`."
+            ],
+            "type": {
+              "option": {
+                "defined": {
+                  "name": "Outcome"
+                }
+              }
+            }
+          },
+          {
+            "name": "pools",
+            "docs": [
+              "Total staked per outcome, index-aligned with `Outcome`."
+            ],
+            "type": {
+              "array": [
+                "u64",
+                3
+              ]
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MarketState",
+      "docs": [
+        "Lifecycle of a market. Funds can only enter while `Open` and only leave via",
+        "`claim` once `Resolved` — there is no authority that can move them otherwise."
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Open"
+          },
+          {
+            "name": "Resolved"
+          }
+        ]
+      }
+    },
+    {
+      "name": "NDimensionalStrategy",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "geometric_targets",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "GeometricTarget"
+                }
+              }
+            }
+          },
+          {
+            "name": "distance_predicate",
+            "type": {
+              "option": {
+                "defined": {
+                  "name": "TraderPredicate"
+                }
+              }
+            }
+          },
+          {
+            "name": "discrete_predicates",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "StatPredicate"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Outcome",
+      "docs": [
+        "1X2 outcome, index-aligned with `Market::pools`."
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "P1Win"
+          },
+          {
+            "name": "Draw"
+          },
+          {
+            "name": "P2Win"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Position",
+      "docs": [
+        "One bettor's stake in one market (a bettor keeps a single outcome per market).",
+        "PDA: `[\"pos\", market, owner]`."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "docs": [
+              "Market this position belongs to (redundant with the PDA seeds; kept for off-chain indexing)."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "docs": [
+              "Bettor (redundant with the PDA seeds; kept for off-chain indexing)."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "outcome",
+            "docs": [
+              "`Outcome` index staked on."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "amount",
+            "docs": [
+              "Cumulative stake."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "claimed",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProofNode",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "is_right_sibling",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ScoreStat",
+      "docs": [
+        "The on-chain representation of a single, provable key-value statistic.",
+        "This is the leaf of the inner-most Merkle tree."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": "u32"
+          },
+          {
+            "name": "value",
+            "type": "i32"
+          },
+          {
+            "name": "period",
+            "type": "i32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ScoresBatchSummary",
+      "docs": [
+        "The summary for a single fixture's scores events within a 5-minute batch.",
+        "This contains the root of the sub-tree of all events for that fixture."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "fixture_id",
+            "type": "i64"
+          },
+          {
+            "name": "update_stats",
+            "type": {
+              "defined": {
+                "name": "ScoresUpdateStats"
+              }
+            }
+          },
+          {
+            "name": "events_sub_tree_root",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ScoresUpdateStats",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "update_count",
+            "type": "i32"
+          },
+          {
+            "name": "min_timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "max_timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StatLeaf",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "stat",
+            "type": {
+              "defined": {
+                "name": "ScoreStat"
+              }
+            }
+          },
+          {
+            "name": "stat_proof",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "ProofNode"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "StatPredicate",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Single",
+            "fields": [
+              {
+                "name": "index",
+                "type": "u8"
+              },
+              {
+                "name": "predicate",
+                "type": {
+                  "defined": {
+                    "name": "TraderPredicate"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "Binary",
+            "fields": [
+              {
+                "name": "index_a",
+                "type": "u8"
+              },
+              {
+                "name": "index_b",
+                "type": "u8"
+              },
+              {
+                "name": "op",
+                "type": {
+                  "defined": {
+                    "name": "BinaryExpression"
+                  }
+                }
+              },
+              {
+                "name": "predicate",
+                "type": {
+                  "defined": {
+                    "name": "TraderPredicate"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "StatValidationInput",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "ts",
+            "type": "i64"
+          },
+          {
+            "name": "fixture_summary",
+            "type": {
+              "defined": {
+                "name": "ScoresBatchSummary"
+              }
+            }
+          },
+          {
+            "name": "fixture_proof",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "ProofNode"
+                }
+              }
+            }
+          },
+          {
+            "name": "main_tree_proof",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "ProofNode"
+                }
+              }
+            }
+          },
+          {
+            "name": "event_stat_root",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "stats",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "StatLeaf"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "TraderPredicate",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "threshold",
+            "type": "i32"
+          },
+          {
+            "name": "comparison",
+            "type": {
+              "defined": {
+                "name": "Comparison"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

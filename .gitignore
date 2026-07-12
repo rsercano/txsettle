@@ -8,3 +8,5 @@ target/
 test-ledger/
 .anchor/
 .DS_Store
+.next/
+*.tsbuildinfo
