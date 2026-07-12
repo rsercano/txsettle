@@ -1,5 +1,7 @@
 # TxSettle
 
+**Live demo:** https://txsettle.vercel.app · **Program (devnet):** [`45MwWqTXE9nWN2kyVERpZqRXwr6vDDaMyk9sYudG14qx`](https://explorer.solana.com/address/45MwWqTXE9nWN2kyVERpZqRXwr6vDDaMyk9sYudG14qx?cluster=devnet)
+
 **Trustless settlement infrastructure for TxLINE prediction markets on Solana.**
 
 TxODDS publishes Merkle roots of every 5-minute batch of World Cup match data on-chain (the txoracle program's `daily_scores_roots` accounts). TxSettle turns that into a settlement primitive: it fetches the Merkle proof for a finished fixture's analyst-verified final stats from TxLINE, shapes it into the exact argument pair of the on-chain `validate_stat_v2` instruction, and verifies it against the published root — so a prediction market can resolve on data that is *provably* what TxODDS published, with no admin key and no trusted oracle deciding winners. If the proof doesn't verify, the market cannot resolve. That's the whole point.
