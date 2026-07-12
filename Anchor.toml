@@ -1,0 +1,43 @@
+[toolchain]
+package_manager = "npm"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+txsettle_market = "45MwWqTXE9nWN2kyVERpZqRXwr6vDDaMyk9sYudG14qx"
+
+[programs.devnet]
+txsettle_market = "45MwWqTXE9nWN2kyVERpZqRXwr6vDDaMyk9sYudG14qx"
+
+[provider]
+cluster = "devnet"
+wallet = "/Users/sercan/IdeaProjects/matchday/_keys/matchday-dev.json"
+
+[scripts]
+test = "npx tsx --test tests/txsettle_market.test.ts"
+
+# Local tests run against the REAL txoracle verifier:
+#   anchor test --provider.cluster localnet --validator legacy
+# (`--validator legacy` = solana-test-validator; the anchor 1.x default is
+# surfpool, which is not installed). The validator clones the txoracle
+# program and the daily_scores_roots accounts for the test fixtures'
+# epoch days from devnet.
+[test]
+startup_wait = 60000
+
+[test.validator]
+url = "https://api.devnet.solana.com"
+
+# txoracle program (devnet)
+[[test.validator.clone]]
+address = "6pW64gN1s2uqjHkn1unFeEjAwJkPGHoppGvS715wyP2J"
+
+# daily_scores_roots epochDay 20645 (2026-07-11 — Norway vs England, fixture 18213979)
+[[test.validator.clone]]
+address = "EdJuEftTBNwXRWJpvYCziVxKT87qMDVu9V6HC7PwGffB"
+
+# daily_scores_roots epochDay 20644 (2026-07-10 — Spain vs Belgium, fixture 18218149)
+[[test.validator.clone]]
+address = "9r38iAd4MyQn7DHEGNGkH4myRJHtHT95mfnndCZ25dkC"
