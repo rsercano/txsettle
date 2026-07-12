@@ -11,7 +11,20 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    }
+    },
+    "./proof": {
+      "types": "./dist/proof.d.ts",
+      "default": "./dist/proof.js"
+    },
+    "./txline": {
+      "types": "./dist/txline.d.ts",
+      "default": "./dist/txline.js"
+    },
+    "./verify": {
+      "types": "./dist/verify.d.ts",
+      "default": "./dist/verify.js"
+    },
+    "./idl/txoracle.json": "./idl/txoracle.json"
   },
   "files": [
     "dist",
