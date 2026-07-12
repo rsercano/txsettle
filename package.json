@@ -1,0 +1,20 @@
+{
+  "name": "txsettle",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TxSettle — trustless settlement infrastructure for TxLINE prediction markets on Solana. Built for the TxODDS x Solana World Cup Hackathon 2026 (Prediction Markets & Settlement track).",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces",
+    "typecheck": "npm run typecheck --workspaces"
+  },
+  "author": "Sercan Ozdemir (https://github.com/rsercano)",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20 <21"
+  }
+}

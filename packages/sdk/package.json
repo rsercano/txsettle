@@ -1,0 +1,48 @@
+{
+  "name": "@txsettle/sdk",
+  "version": "0.1.0",
+  "description": "Trustless settlement proofs for TxLINE World Cup data on Solana: fetch Merkle stat proofs from TxLINE and pre-verify them against the on-chain txoracle daily_scores_roots via validate_stat_v2.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": "Sercan Ozdemir (https://github.com/rsercano)",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "idl",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "tsx --test test/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "solana",
+    "txline",
+    "txodds",
+    "settlement",
+    "merkle-proof",
+    "prediction-markets",
+    "world-cup"
+  ],
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.32.1",
+    "@solana/web3.js": "^1.98.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "dotenv": "^17.4.2",
+    "tsx": "^4.23.0",
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
