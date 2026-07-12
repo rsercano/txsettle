@@ -6,7 +6,9 @@ TxODDS publishes Merkle roots of every 5-minute batch of World Cup match data on
 
 Built for the **TxODDS x Solana World Cup Hackathon 2026 — Prediction Markets & Settlement track**, by the same author as the Consumer-track entry [MatchDay](https://github.com/rsercano/matchday) (a Telegram watch-party bot; distinct project, shared feed knowledge only).
 
-> **Status: early stage.** The SDK (proof fetch + on-chain pre-verification) is working end-to-end against devnet. The parimutuel market program and web UI are in progress.
+> **Status:** SDK and the parimutuel market program are live end-to-end on devnet — a real World Cup quarterfinal (Norway 1-2 England) has been settled permissionlessly against TxODDS' published Merkle root. Web UI in progress.
+>
+> **Market program (devnet):** [`45MwWqTXE9nWN2kyVERpZqRXwr6vDDaMyk9sYudG14qx`](https://explorer.solana.com/address/45MwWqTXE9nWN2kyVERpZqRXwr6vDDaMyk9sYudG14qx?cluster=devnet)
 
 ## Architecture
 
@@ -23,7 +25,7 @@ Built for the **TxODDS x Solana World Cup Hackathon 2026 — Prediction Markets 
    └──────────────────┬──────────────────────────┘
                       ▼
    ┌─────────────────────────────────────────────┐
-   │ programs/txsettle (WIP)                     │   parimutuel markets:
+   │ programs/txsettle_market                    │   parimutuel 1X2 markets:
    │  create_market · place · resolve · claim    │   resolve() is permissionless —
    └──────────────────┬──────────────────────────┘   anyone with the proof settles
                       ▼
@@ -62,7 +64,22 @@ const { verified, detail, explorerUrl } = await preVerify(proof);
 console.log(verified, detail, explorerUrl);
 ```
 
-`proof.payload` and `proof.strategy` are byte-for-byte the two arguments `validate_stat_v2` takes — the same pair the TxSettle market program's `resolve` will consume.
+`proof.payload` and `proof.strategy` are byte-for-byte the two arguments `validate_stat_v2` takes — the same pair the TxSettle market program's `resolve` consumes.
+
+## Market program
+
+`programs/txsettle_market` (Anchor) — parimutuel 1X2 markets with no authority anywhere in the flow:
+
+- `create_market(fixture_id, close_ts)` — one market per fixture (PDA `["market", fixture_id]`), escrow vault owned by the market PDA itself.
+- `place(outcome, amount)` — stake mock-USDC on P1Win/Draw/P2Win before `close_ts`; repeat stakes accumulate, switching sides is rejected.
+- `resolve(payload, strategy)` — **permissionless**. In-program gates before the verifier is even consulted: the proof must be about this fixture; it must carry exactly the full-match goal stats (keys 1 & 2) from the analyst-verified `game_finalised` record (`period == 100` — mid-game proofs verify too, this is what makes "verified" mean "final"); the `daily_scores_roots` account is re-derived from the proof's own timestamp (a client-supplied account is never trusted); and the strategy must pin every proved value with exact-equality predicates. Then the program CPIs into txoracle's `validate_stat_v2` and reads the returned bool from CPI return data — a successful CPI alone is not verification. Outcome is derived from the proved goal counts only.
+- `claim()` — winners split the whole pot pro-rata (`floor(stake × total / winning_pool)`); if nobody picked the winner, every position reclaims its stake.
+
+```bash
+npm run test:program   # localnet suite (13 tests) against the REAL txoracle program +
+                       # daily roots cloned from devnet — needs TXLINE_API_TOKEN in .env
+npm run e2e:devnet     # full live cycle on devnet, prints every tx + explorer link
+```
 
 ## Repository layout
 
@@ -70,7 +87,10 @@ console.log(verified, detail, explorerUrl);
 |------|------|
 | `packages/sdk` | `@txsettle/sdk` — TxLINE client, settlement-proof builder, on-chain pre-verification |
 | `packages/sdk/idl/txoracle.json` | Public txoracle IDL (note: ships with the mainnet address; the SDK overrides it with the devnet program id) |
-| `programs/txsettle` | Parimutuel market program (WIP, day 2) |
+| `programs/txsettle_market` | Parimutuel 1X2 market program (Anchor), settles via `validate_stat_v2` CPI |
+| `idls/txoracle.json` | txoracle IDL copy consumed by `declare_program!` (address patched to the devnet id) |
+| `tests/` | Localnet integration suite (real txoracle + daily roots cloned from devnet) |
+| `scripts/e2e-devnet.ts` | Live devnet run of the full market cycle on a real finished fixture |
 | `apps/web` | Verification / market UI (WIP) |
 
 ## Compliance notes
