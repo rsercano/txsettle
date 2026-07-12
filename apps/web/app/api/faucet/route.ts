@@ -45,9 +45,12 @@ let authority: Keypair | undefined;
 
 function mintAuthority(): Keypair {
   if (!authority) {
+    // Hosted (Vercel): key material in DEV_WALLET_JSON; local: file at DEV_WALLET_PATH.
+    const json = process.env.DEV_WALLET_JSON;
     const path = process.env.DEV_WALLET_PATH;
-    if (!path) throw new Error("DEV_WALLET_PATH is not configured");
-    authority = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(fs.readFileSync(path, "utf8")) as number[]));
+    const raw = json ?? (path ? fs.readFileSync(path, "utf8") : undefined);
+    if (!raw) throw new Error("Set DEV_WALLET_JSON or DEV_WALLET_PATH for the faucet signer");
+    authority = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(raw) as number[]));
   }
   return authority;
 }
